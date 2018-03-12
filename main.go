@@ -25,11 +25,15 @@ func New(db *sql.DB, driverName string) *migrator {
 	}
 }
 
-func (m *migrator) AddCollection(sts []MigrateStatement) {
+func (m *migrator) GetCollection() *MigrationCollection {
 	if m.collection != nil {
-		return
+		return m.collection
 	}
+	log.Fatal("Migration collection not found")
+	return nil
+}
 
+func (m *migrator) SetCollection(sts []MigrateStatement) {
 	collection := MigrationCollection{}
 	for i := range sts {
 		collection.Add(&sts[i])
@@ -38,19 +42,34 @@ func (m *migrator) AddCollection(sts []MigrateStatement) {
 }
 
 func (m *migrator) EnsureSchema(targetVersion string) {
-	record := m.getCurrentRecord()
-	if record.Version == targetVersion {
+	currentNode, err := m.getCurrentNode()
+
+	if err != nil && err != ErrRecordNotFound {
+		log.Fatal(err)
+	}
+
+	if err == ErrRecordNotFound {
+		currentNode = m.GetCollection().Head()
+		m.upto(currentNode, targetVersion)
 		return
 	}
-	if record.Version < targetVersion {
-		node := m.getCurrentNode()
-		m.upto(node, targetVersion)
+
+	st := currentNode.Statement()
+	if st.Version == targetVersion {
+		return
+	}
+	if st.Version < targetVersion {
+		log.Println("start migrate")
+		m.upto(currentNode, targetVersion)
 	}
 }
 
-func (m *migrator) getCurrentNode() *migrationItem {
-	record := m.getCurrentRecord()
-	return m.collection.Find(record.Version)
+func (m *migrator) getCurrentNode() (*migrationItem, error) {
+	record, err := getLastRecord(m.db)
+	if err != nil {
+		return nil, err
+	}
+	return m.GetCollection().Find(record.Version), nil
 }
 
 func (m *migrator) upto(currentNode *migrationItem, targetVersion string) {
@@ -71,21 +90,6 @@ func (m *migrator) upto(currentNode *migrationItem, targetVersion string) {
 }
 
 func (m *migrator) Up() {
-	node := m.getCurrentNode()
-	lastVersion := m.collection.LastStatement().Version
-	if node.statement.Version < lastVersion {
-		m.upto(node, lastVersion)
-	}
-}
-
-func (m *migrator) getCurrentRecord() *MigrationRecord {
-	tx := m.db.MustBegin()
-
-	record, err := getLastRecord(tx)
-	if err != nil && err != ErrRecordNotFound {
-		log.Fatal(err)
-	}
-	log.Println("record: ", record)
-
-	return record
+	lastVersion := m.GetCollection().LastStatement().Version
+	m.EnsureSchema(lastVersion)
 }

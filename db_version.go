@@ -47,13 +47,13 @@ func addRecord(tx *sqlx.Tx, version, filename, checksum string) error {
 	return nil
 }
 
-func getLastRecord(tx *sqlx.Tx) (*MigrationRecord, error) {
+func getLastRecord(db *sqlx.DB) (*MigrationRecord, error) {
 	sql := `
 	SELECT * FROM schema_version
 	ORDER by id desc
 	LIMIT 1
 	`
-	row, err := tx.Queryx(sql)
+	row, err := db.Queryx(sql)
 	if err != nil {
 		return nil, err
 	}

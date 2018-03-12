@@ -16,8 +16,8 @@ func GenerateCollection(path string) {
 
 import "github.com/cororoGrap/makoto"
 
-func GetCollection() []MigrateStatement {
-	return []MigrateStatement{
+func GetCollection() []makoto.MigrateStatement {
+	return []makoto.MigrateStatement{
 	`)
 
 	collection := processMigrationCollection(path)

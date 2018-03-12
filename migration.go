@@ -80,8 +80,8 @@ func (m *MigrationCollection) Add(st *MigrateStatement) {
 }
 
 func (m *MigrationCollection) Find(version string) *migrationItem {
+	migration := m.head
 	for {
-		migration := m.head
 		if migration == nil {
 			return nil
 		}
