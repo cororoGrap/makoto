@@ -8,32 +8,32 @@ import (
 
 type MigrateUp struct {
 	tx         *sqlx.Tx
-	collection *migrationCollection
+	collection *MigrationCollection
 }
 
-func (m *MigrateUp) Up() {
-	currentNode := m.collection.head
+// func (m *MigrateUp) Up() {
+//     currentNode := m.collection.head
 
-	record, err := getLastRecord(m.tx)
-	if err != nil && err != ErrRecordNotFound {
-		log.Fatal(err)
-	}
-	log.Println("record: ", record)
+//     record, err := getLastRecord(m.tx)
+//     if err != nil && err != ErrRecordNotFound {
+//         log.Fatal(err)
+//     }
+//     log.Println("record: ", record)
 
-	if record != nil {
-		currentNode = m.collection.Find(record.Version)
-	}
-	currentSt := currentNode.statement
-	log.Println("currentSt: ", currentSt.Version)
+//     if record != nil {
+//         currentNode = m.collection.Find(record.Version)
+//     }
+//     currentSt := currentNode.statement
+//     log.Println("currentSt: ", currentSt.Version)
 
-	lastSt := m.collection.LastStatement()
-	if lastSt.Version > currentSt.Version {
-		log.Printf("migrate from %v to %v \n", currentSt.Version, lastSt.Version)
-		m.upto(currentNode, lastSt.Version)
-	}
-}
+//     lastSt := m.collection.LastStatement()
+//     if lastSt.Version > currentSt.Version {
+//         log.Printf("migrate from %v to %v \n", currentSt.Version, lastSt.Version)
+//         m.upto(currentNode, lastSt.Version)
+//     }
+// }
 
-func (m *MigrateUp) upto(node *migrationItem, targetVersion string) {
+func (m *MigrateUp) UpTo(node *migrationItem, targetVersion string) {
 	tx := m.tx
 
 	currentNode := node

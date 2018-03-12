@@ -1,4 +1,4 @@
-package makoto
+package main
 
 import (
 	"bytes"
@@ -21,9 +21,9 @@ func GetCollection() []MigrateStatement {
 	`)
 
 	collection := processMigrationCollection(path)
-	migration := collection.head
+	migration := collection.Head()
 	for {
-		st := migration.statement
+		st := migration.Statement()
 		upSt, _ := json.Marshal(st.UpStatement)
 		downSt, _ := json.Marshal(st.DownStatement)
 
@@ -31,8 +31,8 @@ func GetCollection() []MigrateStatement {
 		{"%v", "%v", %v, %v, "%v"},
 		`, st.Version, st.Filename, string(upSt), string(downSt), st.Checksum)
 
-		if migration.nextNode != nil {
-			migration = migration.nextNode
+		if migration.Next() != nil {
+			migration = migration.Next()
 			continue
 		}
 		break

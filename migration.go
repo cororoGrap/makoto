@@ -28,11 +28,27 @@ type migrationItem struct {
 	nextNode     *migrationItem
 }
 
-type migrationCollection struct {
+func (m *migrationItem) Statement() *MigrateStatement {
+	return &m.statement
+}
+
+func (m *migrationItem) Next() *migrationItem {
+	return m.nextNode
+}
+
+func (m *migrationItem) Previous() *migrationItem {
+	return m.previousNode
+}
+
+type MigrationCollection struct {
 	head *migrationItem
 }
 
-func (m *migrationCollection) Add(st *MigrateStatement) {
+func (m *MigrationCollection) Head() *migrationItem {
+	return m.head
+}
+
+func (m *MigrationCollection) Add(st *MigrateStatement) {
 	newItem := &migrationItem{
 		statement: *st,
 	}
@@ -63,7 +79,7 @@ func (m *migrationCollection) Add(st *MigrateStatement) {
 	}
 }
 
-func (m *migrationCollection) Find(version string) *migrationItem {
+func (m *MigrationCollection) Find(version string) *migrationItem {
 	for {
 		migration := m.head
 		if migration == nil {
@@ -76,7 +92,7 @@ func (m *migrationCollection) Find(version string) *migrationItem {
 	}
 }
 
-func (m *migrationCollection) FindStatement(version string) *MigrateStatement {
+func (m *MigrationCollection) FindStatement(version string) *MigrateStatement {
 	item := m.Find(version)
 	if item == nil {
 		return nil
@@ -84,7 +100,7 @@ func (m *migrationCollection) FindStatement(version string) *MigrateStatement {
 	return &item.statement
 }
 
-func (m *migrationCollection) LastStatement() *MigrateStatement {
+func (m *MigrationCollection) LastStatement() *MigrateStatement {
 	if m.head == nil {
 		return nil
 	}

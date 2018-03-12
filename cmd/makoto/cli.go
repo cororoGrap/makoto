@@ -1,9 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 
 	"github.com/cororoGrap/makoto"
 )
@@ -11,26 +14,40 @@ import (
 const migrationPath = "migration"
 
 func initMigrationDir() {
-	migrationPath, err := getMigrationDir()
-	if err != nil {
-		return
-	}
-	os.Mkdir(migrationPath, os.ModePerm)
+	dir := currentDir()
+	path := filepath.Join(dir, migrationPath)
+	os.Mkdir(path, os.ModePerm)
 }
 
 func collectMigrationScrips() {
-	migrationPath, err := getMigrationDir()
-	if err != nil {
-		log.Fatal("Migration not yet initialized")
-	}
+	migrationPath := getMigrationDir()
 
-	makoto.GenerateCollection(migrationPath)
+	GenerateCollection(migrationPath)
 }
 
-func getMigrationDir() (string, error) {
+func exists(path string) bool {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true
+	}
+	if os.IsNotExist(err) {
+		return false
+	}
+	log.Fatal(err)
+	return true
+}
+
+func getMigrationDir() string {
 	dir := currentDir()
+	if strings.HasSuffix(dir, migrationPath) {
+		return dir
+	}
 	fullPath := filepath.Join(dir, migrationPath)
-	return fullPath, nil
+	if exists(fullPath) {
+		return fullPath
+	}
+	log.Fatal("Unknow migration directory")
+	return ""
 }
 
 func currentDir() string {
@@ -39,4 +56,32 @@ func currentDir() string {
 		log.Fatal(err)
 	}
 	return dir
+}
+
+func createNewScript(name string) {
+	dir := getMigrationDir()
+	version := getNewScriptVersion()
+
+	filename := fmt.Sprintf("v%v_%s.sql", version, name)
+	fullPath := filepath.Join(dir, filename)
+	log.Println("Creating file: ", fullPath)
+	os.Create(fullPath)
+}
+
+func getNewScriptVersion() string {
+	collection := initCollection()
+	if st := collection.LastStatement(); st != nil {
+		v, err := strconv.Atoi(st.Version[1:])
+		if err != nil {
+			log.Fatal(err)
+		}
+		v++
+		return strconv.Itoa(v)
+	}
+	return "1"
+}
+
+func initCollection() *makoto.MigrationCollection {
+	dir := getMigrationDir()
+	return processMigrationCollection(dir)
 }

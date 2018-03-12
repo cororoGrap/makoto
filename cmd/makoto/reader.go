@@ -1,4 +1,4 @@
-package makoto
+package main
 
 import (
 	"bufio"
@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/cororoGrap/makoto"
 )
 
 const SQLFileExtension = ".sql"
@@ -21,11 +23,11 @@ func logError(err error) {
 	}
 }
 
-func processMigrationCollection(path string) *migrationCollection {
+func processMigrationCollection(path string) *makoto.MigrationCollection {
 	files, err := readSQLMigrationScript(path)
 	logError(err)
 
-	collection := &migrationCollection{}
+	collection := &makoto.MigrationCollection{}
 	for _, f := range files {
 		fullPath := filepath.Join(path, f.Name())
 		file, err := os.Open(fullPath)
@@ -71,11 +73,11 @@ func parseFilenameVersion(filename string) string {
 	return r.FindString(filename)
 }
 
-func parseMigration(r io.Reader) (*MigrateStatement, error) {
+func parseMigration(r io.Reader) (*makoto.MigrateStatement, error) {
 	var buf bytes.Buffer
 	isDown := false
 
-	migration := MigrateStatement{}
+	migration := makoto.MigrateStatement{}
 	scanner := bufio.NewScanner(r)
 
 	for scanner.Scan() {
