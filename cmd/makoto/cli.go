@@ -16,12 +16,18 @@ const migrationPath = "migration"
 func initMigrationDir() {
 	dir := currentDir()
 	path := filepath.Join(dir, migrationPath)
-	os.Mkdir(path, os.ModePerm)
+	if exists(path) {
+		fmt.Println("Migration directory already exists")
+		return
+	}
+	err := os.Mkdir(path, os.ModePerm)
+	if err != nil {
+		fmt.Println("Created migration directory")
+	}
 }
 
 func collectMigrationScrips() {
 	migrationPath := getMigrationDir()
-
 	GenerateCollection(migrationPath)
 }
 
@@ -64,7 +70,7 @@ func createNewScript(name string) {
 
 	filename := fmt.Sprintf("v%v_%s.sql", version, name)
 	fullPath := filepath.Join(dir, filename)
-	log.Println("Creating file: ", fullPath)
+	fmt.Println("Create new migration script: ", filename)
 	os.Create(fullPath)
 }
 

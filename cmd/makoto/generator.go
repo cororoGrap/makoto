@@ -11,6 +11,8 @@ import (
 const collectionFilename = "collection.go"
 
 func GenerateCollection(path string) {
+	fmt.Println("Collect migration scripts:")
+
 	buffer := bytes.NewBuffer(nil)
 	fmt.Fprint(buffer, `package migration
 
@@ -30,6 +32,8 @@ func GetCollection() []makoto.MigrateStatement {
 		fmt.Fprintf(buffer, `
 		{"%v", "%v", %v, %v, "%v"},
 		`, st.Version, st.Filename, string(upSt), string(downSt), st.Checksum)
+
+		fmt.Printf("%v\n", st.Filename)
 
 		if migration.Next() != nil {
 			migration = migration.Next()
