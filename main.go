@@ -60,7 +60,7 @@ func (m *migrator) EnsureSchema(targetVersion string) {
 	}
 	if st.Version < targetVersion {
 		log.Println("start migrate")
-		m.upto(currentNode, targetVersion)
+		m.upto(currentNode.nextNode, targetVersion)
 	}
 }
 
