@@ -63,6 +63,7 @@ func (m *MigrationCollection) Add(st *MigrateStatement) {
 		if st.Version < migration.statement.Version {
 			if migration.previousNode != nil {
 				migration.previousNode.nextNode = newItem
+				newItem.previousNode = migration.previousNode
 			} else {
 				m.head = newItem
 			}
