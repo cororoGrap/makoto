@@ -6,11 +6,11 @@ Install
 -------
 Install makoto CLI
 ```bash
-go install -u github.com/cororoGrap/makoto/cmd/makoto
+go get -u github.com/cororoGrap/makoto/cmd/makoto
 ```
 Install makoto migrator
 ```bash
-go install -u github.com/cororoGrap/makoto
+go get github.com/cororoGrap/makoto
 ```
 
 Structure
@@ -32,7 +32,7 @@ makoto init
 
 Create new migration sql script
 ```bash
-makoto new
+makoto new [script_name]
 ```
 
 Generate golang migration collection, a golang file 'collection.go' will be created under the migration directory
