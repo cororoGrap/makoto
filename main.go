@@ -12,6 +12,13 @@ type migrator struct {
 	collection *MigrationCollection
 }
 
+func GetMigrator(db *sqlx.DB, collection *MigrationCollection) *migrator {
+	return &migrator{
+		db:         db,
+		collection: collection,
+	}
+}
+
 func New(db *sql.DB, driverName string) *migrator {
 	xDB := sqlx.NewDb(db, driverName)
 

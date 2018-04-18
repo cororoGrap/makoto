@@ -87,6 +87,8 @@ func getNewScriptVersion() string {
 	return "1"
 }
 
+// func displayMigrati
+
 func initCollection() *makoto.MigrationCollection {
 	dir := getMigrationDir()
 	return processMigrationCollection(dir)

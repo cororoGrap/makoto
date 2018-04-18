@@ -40,6 +40,21 @@ Generate golang migration collection, a golang file 'collection.go' will be crea
 makoto collect
 ```
 
+Database connection uri format
+```
+postgres://[username]:[password]@[host]:5432/[dbname]?sslmode=[enable|disable]
+```
+
+Check current migration status
+```bash
+makoto -database [uri] status
+```
+
+Migrate to latest version
+```bash
+makoto -database [uri] up
+```
+
 Integrate with Golang
 -----
 First generate the collection file with CLI.

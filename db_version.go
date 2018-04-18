@@ -69,7 +69,7 @@ func getLastRecord(db *sqlx.DB) (*MigrationRecord, error) {
 	return nil, ErrRecordNotFound
 }
 
-func getAllRecords(db *sqlx.DB) ([]MigrationRecord, error) {
+func GetAllRecords(db *sqlx.DB) ([]MigrationRecord, error) {
 	sql := `
 	SELECT * FROM schema_version
 	`
