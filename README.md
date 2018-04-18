@@ -40,19 +40,41 @@ Generate golang migration collection, a golang file 'collection.go' will be crea
 makoto collect
 ```
 
-Database connection uri format
-```
-postgres://[username]:[password]@[host]:5432/[dbname]?sslmode=[enable|disable]
-```
 
 Check current migration status
 ```bash
-makoto -database [uri] status
+makoto status
 ```
 
 Migrate to latest version
 ```bash
-makoto -database [uri] up
+makoto up
+```
+
+Database connection uri format
+```
+makoto -database postgres://[username]:[password]@[host]:5432/[dbname]?sslmode=[enable|disable] [command]
+```
+
+Custom config file
+```
+makoto -config [file path] [command]
+```
+
+If no custom config file or database uri is given, makoto will search for "config.json" placed inside migration directory
+
+Config file format
+```json
+{
+  "database": "PostgreSQL",
+  "PostgreSQL": {
+    "Host": "localhost",
+    "Port": "5432",
+    "DBName": "xxx",
+    "User": "postgres",
+    "Password": "123456"
+  }
+}
 ```
 
 Integrate with Golang

@@ -1,8 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/cororoGrap/makoto"
@@ -13,8 +17,12 @@ import (
 
 const version = "0.0.1"
 
+var (
+	database   string
+	configPath string
+)
+
 func main() {
-	var database string
 
 	app := cli.NewApp()
 	app.Name = "makoto"
@@ -24,6 +32,10 @@ func main() {
 		cli.StringFlag{
 			Name:        "database",
 			Destination: &database,
+		},
+		cli.StringFlag{
+			Name:        "config",
+			Destination: &configPath,
 		},
 	}
 
@@ -65,10 +77,7 @@ func main() {
 		{
 			Name: "status",
 			Action: func(c *cli.Context) error {
-				if len(database) == 0 {
-					fmt.Println("Please enter database info")
-					return nil
-				}
+				configureDBUri()
 				db := db.ConnectPostgres(database)
 				r, err := makoto.GetAllRecords(db)
 				if err != nil {
@@ -93,10 +102,7 @@ func main() {
 				},
 			},
 			Action: func(c *cli.Context) error {
-				if len(database) == 0 {
-					fmt.Println("Please enter database info")
-					return nil
-				}
+				configureDBUri()
 				db := db.ConnectPostgres(database)
 				collection := processMigrationCollection(getMigrationDir())
 				migrator := makoto.GetMigrator(db, collection)
@@ -113,4 +119,47 @@ func main() {
 	}
 
 	app.Run(os.Args)
+}
+
+func configureDBUri() {
+	if len(database) == 0 {
+		err := loadDBJson()
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func getConfigPath() string {
+	if len(strings.TrimSpace(configPath)) == 0 {
+		return getDefaultConfigPath()
+	}
+	fmt.Println("this is config path: ", configPath)
+	return configPath
+}
+
+func loadDBJson() error {
+	path := getConfigPath()
+
+	file, err := os.Open(path)
+	logError(err)
+
+	config := dbConfig{}
+	configSt, err := ioutil.ReadAll(file)
+	err = json.Unmarshal(configSt, &config)
+	logError(err)
+
+	if len(config.Database) == 0 || config.Database == "PostgreSQL" {
+		pg := config.PostgreSQL
+		database = fmt.Sprintf("user=%v password=%v host=%v port=%v dbname=%v sslmode=disable",
+			pg.User, pg.Password, pg.Host, pg.Port, pg.DBName)
+	} else {
+		panic("Unsupported database")
+	}
+
+	return nil
+}
+
+func getDefaultConfigPath() string {
+	return filepath.Join(getMigrationDir(), "config.json")
 }
