@@ -1,6 +1,7 @@
 package makoto
 
 import (
+	"strconv"
 	"time"
 )
 
@@ -60,7 +61,7 @@ func (m *MigrationCollection) Add(st *MigrateStatement) {
 
 	migration := m.head
 	for {
-		if st.Version < migration.statement.Version {
+		if v(st.Version) < v(migration.statement.Version) {
 			if migration.previousNode != nil {
 				migration.previousNode.nextNode = newItem
 				newItem.previousNode = migration.previousNode
@@ -114,4 +115,12 @@ func (m *MigrationCollection) LastStatement() *MigrateStatement {
 			return &migration.statement
 		}
 	}
+}
+
+func v(v string) int {
+	val, err := strconv.Atoi(v[1:])
+	if err != nil {
+		panic(err)
+	}
+	return val
 }

@@ -17,7 +17,7 @@ func (m *MigrateUp) UpTo(node *migrationItem, targetVersion string) {
 	currentNode := node
 	for {
 		statement := currentNode.statement
-		if statement.Version <= targetVersion {
+		if v(statement.Version) <= v(targetVersion) {
 			_, err := tx.Exec(statement.UpStatement)
 			if err != nil {
 				log.Println("Fail to run migration script: ", statement.Filename)
