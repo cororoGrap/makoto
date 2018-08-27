@@ -39,6 +39,11 @@ func processMigrationCollection(path string) *makoto.MigrationCollection {
 		migration.Filename = f.Name()
 		migration.Version = parseFilenameVersion(f.Name())
 
+		// skip invalid file
+		if migration.Version == "" {
+			continue
+		}
+
 		collection.Add(migration)
 	}
 
