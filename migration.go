@@ -94,15 +94,7 @@ func (m *MigrationCollection) Find(version string) *migrationItem {
 	}
 }
 
-func (m *MigrationCollection) FindStatement(version string) *MigrateStatement {
-	item := m.Find(version)
-	if item == nil {
-		return nil
-	}
-	return &item.statement
-}
-
-func (m *MigrationCollection) LastStatement() *MigrateStatement {
+func (m *MigrationCollection) Tail() *migrationItem {
 	if m.head == nil {
 		return nil
 	}
@@ -112,9 +104,21 @@ func (m *MigrationCollection) LastStatement() *MigrateStatement {
 		if migration.nextNode != nil {
 			migration = migration.nextNode
 		} else {
-			return &migration.statement
+			return migration
 		}
 	}
+}
+
+func (m *MigrationCollection) FindStatement(version string) *MigrateStatement {
+	item := m.Find(version)
+	if item == nil {
+		return nil
+	}
+	return &item.statement
+}
+
+func (m *MigrationCollection) LastStatement() *MigrateStatement {
+	return m.Tail().Statement()
 }
 
 func v(v string) int {

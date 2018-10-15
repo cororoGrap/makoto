@@ -76,6 +76,9 @@ func (m *migrator) getCurrentNode() (*migrationItem, error) {
 	if err != nil {
 		return nil, err
 	}
+	if record.Version > m.GetCollection().LastStatement().Version {
+		return m.GetCollection().Tail(), nil
+	}
 	return m.GetCollection().Find(record.Version), nil
 }
 
